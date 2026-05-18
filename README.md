@@ -1,149 +1,100 @@
 # Phishing Forensic & Awareness System
 
-## Overview
-This project presents a complete security analysis framework focused on phishing detection, email forensics, and organizational awareness against modern social engineering attacks.
-
-The objective is to simulate the role of a Security Operations Center (SOC) Analyst by investigating suspicious emails, analyzing email headers, identifying authentication failures, and building a resilient security awareness strategy.
+This directory houses the comprehensive security analysis of email threats and the strategic organizational awareness framework designed to counter modern engineering attacks.
 
 ---
 
-# Objectives
+# Objective
 
-- Analyze suspicious emails using forensic methodologies
-- Detect spoofing and phishing indicators
-- Investigate email authentication mechanisms
-- Understand modern phishing techniques
-- Design an organizational defense and awareness framework
-- Improve threat detection and incident response efficiency
+To operate as a Security Operations Center (SOC) Analyst by triaging suspicious emails, analyzing underlying transit headers for authentication failures, mapping modern social engineering trends, and establishing a resilient defense strategy.
 
 ---
 
 # Forensic Methodology & Header Analysis
 
-Email headers act as the “black box” of message transmission.  
-Analysis is performed chronologically from the lowest `Received:` field upward to trace the original source of the email.
+An email header functions as the network "black box" of message transit. To perform trace forensics, analysis is executed from bottom to top (chronologically mapping the hops):
 
-## SPF (Sender Policy Framework)
-Verifies whether the sender’s mail server IP address matches the authorized IPs defined in the domain DNS records.
+## Sender Policy Framework (SPF)
 
-### Indicators
-- `Pass` → Legitimate sender validation
-- `Fail` or `SoftFail` → Potential spoofing attempt
+We verify if the sending mail server's IP address matches the authorized IPs listed in the sender's DNS records. An SPF result of `Fail` or `SoftFail` indicates potential spoofing.
 
----
+## DomainKeys Identified Mail (DKIM)
 
-## DKIM (DomainKeys Identified Mail)
-Checks the cryptographic signature embedded within the email header to ensure that the message content has not been altered during transit.
+We inspect the cryptographic signature embedded in the email header to confirm that the message body was not altered or tampered with during transit.
 
-### Purpose
-- Validates message integrity
-- Prevents email tampering
+## Domain-based Message Authentication (DMARC)
 
----
-
-## DMARC (Domain-based Message Authentication, Reporting & Conformance)
-Ensures alignment between SPF, DKIM, and the visible `From:` domain.
-
-### Failure Conditions
-An email fails DMARC when:
-- SPF fails or does not align
-- DKIM fails or does not align
-
----
+We verify alignment. An email fails DMARC when both SPF and DKIM fail or do not align with the domain in the `From:` header.
 
 ## Network Path Analysis
-The original sender IP is identified through deep inspection of the `Received:` headers to bypass relay obfuscation techniques.
+
+We extract the lowest `Received:` header to locate the attacker's true origin IP, bypassing deceptive hop relays.
 
 ---
 
 # Threat Classification Framework
 
-## Category 1 — Safe
+## Category 1: Safe
 
 ### Criteria
-- Valid SPF, DKIM, and DMARC
-- Legitimate sender domain
-- No malicious indicators detected
+
+Fully validated SPF, DKIM, and DMARC alignment. The sender domain is known and legitimate, with no high-risk indicators or malicious attachments.
 
 ### Security Action
-- Allow normal inbox delivery
+
+Normal delivery to the user's inbox.
 
 ---
 
-## Category 2 — Suspicious
+## Category 2: Suspicious
 
 ### Criteria
-- Minor header inconsistencies
-- Newly registered domains
-- Urgent or manipulative language patterns
+
+Minor header inconsistencies, domain age is under 30 days, or the message contains urgent/coercive language.
 
 ### Security Action
-- Quarantine email
-- Perform static analysis
-- Open links in isolated sandbox environments
+
+Route the email to a quarantine queue. Execute static analysis and test any links inside an isolated dynamic sandbox.
 
 ---
 
-## Category 3 — Phishing
+## Category 3: Phishing
 
 ### Criteria
-- DMARC failure
-- Credential harvesting attempts
-- Malicious attachments
-- Spoofed internal identities
+
+Explicit DMARC failure, confirmed credential-harvesting links, malicious attachment signatures, or spoofed internal sender identities.
 
 ### Security Action
-- Block sender immediately
-- Purge emails from corporate inboxes
-- Update firewall and Secure Email Gateway (SEG) indicators
+
+Immediately block the sender, purge the email from all corporate inboxes, and update the firewall and Secure Email Gateway (SEG) blocks with the newly discovered Indicators of Compromise (IoCs).
 
 ---
 
-# Modern Threat Landscape
+# Modern Threat Landscapes
 
 ## AI-Generated Phishing
-Attackers use Large Language Models (LLMs) to create highly convincing and grammatically flawless phishing emails.
 
-### Risks
-- Personalized targeting
-- Reduced human detection capability
-
----
+Attackers leverage Large Language Models (LLMs) to generate linguistically flawless, hyper-personalized emails. This removes traditional indicators like poor grammar and awkward syntax.
 
 ## Voice Cloning (Vishing)
-Cybercriminals clone executive voices using short public audio samples from platforms such as LinkedIn or YouTube.
 
-### Attack Goal
-- Fraudulent financial approvals
-- Wire transfer manipulation
-
----
+Exploiting brief public audio samples (from platforms like LinkedIn or YouTube) to clone an executive's voice. This is used in multi-channel attacks to validate fraudulent wire transfers.
 
 ## Quishing (QR Code Phishing)
-Malicious QR codes are embedded inside emails to bypass traditional email security scanners.
 
-### Risk
-Users scanning QR codes on personal devices may unknowingly access phishing websites.
+Embedding malicious QR codes inside emails. Secure Email Gateways often fail to scan images, leaving the user vulnerable when scanning the code with a personal mobile device.
 
----
+## Multi-Factor Authentication (MFA) Fatigue
 
-## MFA Fatigue Attacks
-Attackers repeatedly send Multi-Factor Authentication push requests until the victim accidentally approves access.
-
-### Impact
-- Session hijacking
-- Unauthorized account access
+Bombarding a target with endless MFA push notifications until they approve the request out of frustration, allowing attackers to hijack active sessions.
 
 ---
 
-# Security Metrics & Human Firewall
+# Security Metrics & The Human Firewall
 
-This framework promotes proactive threat reporting rather than passive avoidance.
+We shift organizational defense performance from passive avoidance to proactive detection. The primary KPI is no longer the Click-Through Rate, but rather the Reporting Rate.
 
-## Primary KPI
-The main performance indicator is the **Reporting Rate** instead of the traditional click-through rate.
-
-### Target Metric
+Our target is to build an active defense where the Reporting Ratio exceeds 2:
 
 ```math
-Reported Emails / Clicked Links > 2
+Ratio = \frac{\text{Reported Emails}}{\text{Clicked Links}} > 2
